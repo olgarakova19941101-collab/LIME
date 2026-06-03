@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIMÉ · Оценка компетенций</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F5F0;--surface:#fff;--border:#E8E4DC;--border-m:#D4CFC4;
+  --text:#1A1814;--text2:#6B6560;--text3:#A09A93;--dark:#2A2420;
+  --green:#4A7C59;--green-bg:#EEF4F0;--green-t:#2D5A3D;--green-b:#A8D5B8;
+  --red:#C0392B;--red-bg:#FDECEA;--red-t:#8B1A12;--red-b:#F5A89F;
+  --amber:#B8860B;--amber-bg:#FEF9E7;--amber-t:#7A5800;--amber-b:#F0D090;
+  --blue:#1A5276;--blue-bg:#EBF5FB;--blue-t:#0D3349;
+  --purple:#6C3483;--purple-bg:#F5EEF8;--purple-t:#4A235A;
+  --orange:#E67E22;--orange-bg:#FDF2E9;--orange-t:#784212;
+  --r:10px;--rl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+button,input,select,textarea{font-family:'Manrope',sans-serif}
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--dark);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
+.main-area{margin-left:220px;flex:1;min-height:100vh}
+.logo{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-name{font-family:'Playfair Display',serif;font-size:20px;color:#fff;letter-spacing:.04em}
+.logo-name em{font-style:italic}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{padding:14px 10px;flex:1}
+.nav-label{font-size:10px;color:rgba(255,255,255,.28);letter-spacing:.1em;text-transform:uppercase;padding:14px 10px 5px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;text-align:left;margin-bottom:2px;transition:all .15s}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:rgba(255,255,255,.14);color:#fff}
+.page{display:none}
+.page.show{display:block}
+.page-header{background:var(--surface);border-bottom:1px solid var(--border);padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:5}
+.page-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:500}
+.page-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.page-content{padding:24px 32px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;line-height:1}
+.btn-dark{background:var(--dark);color:#fff}
+.btn-dark:hover{opacity:.85}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border-m)}
+.btn-outline:hover{background:var(--bg)}
+.btn-green{background:var(--green-bg);color:var(--green-t);border:1px solid var(--green-b)}
+.btn-orange{background:var(--orange-bg);color:var(--orange-t);border:1px solid #F0B27A}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-b)}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:700;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:3px}
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.chart-sub{font-size:11px;color:var(--text2);margin-bottom:14px}
+.bar-row{margin-bottom:7px}
+.bar-lbl-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px}
+.bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
+/* FILTER */
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filter-row span{font-size:12px;color:var(--text2)}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border-m);background:var(--surface);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer}
+.chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+/* SEARCH */
+.search-wrap{position:relative;display:inline-block}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.search-inp{padding:7px 12px 7px 32px;border:1px solid var(--border-m);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface);width:190px}
+.search-inp:focus{outline:none;border-color:var(--dark)}
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:9px 13px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--bg);text-align:left}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F9F7F3}
+tbody td{padding:11px 13px;vertical-align:middle}
+.card-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.b-green{background:var(--green-bg);color:var(--green-t)}
+.b-red{background:var(--red-bg);color:var(--red-t)}
+.b-amber{background:var(--amber-bg);color:var(--amber-t)}
+.b-blue{background:var(--blue-bg);color:var(--blue-t)}
+.b-orange{background:var(--orange-bg);color:var(--orange-t)}
+.b-gray{background:var(--bg);color:var(--text2);border:1px solid var(--border)}
+.score-pill{display:inline-flex;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--amber-bg);color:var(--amber-t)}
+.score-pill-orange{display:inline-flex;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--orange-bg);color:var(--orange-t)}
+/* STATUS BADGE */
+.status-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.sb-recruiter{background:var(--blue-bg);color:var(--blue-t)}
+.sb-manager{background:var(--orange-bg);color:var(--orange-t)}
+.sb-complete{background:var(--green-bg);color:var(--green-t)}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--rl);width:100%;max-width:720px;margin:auto;box-shadow:0 8px 32px rgba(0,0,0,.14)}
+.modal-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:500}
+.modal-close{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:15px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--bg)}
+.modal-body{padding:18px 22px;max-height:66vh;overflow-y:auto}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+/* STEP TABS */
+.step-tabs{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.step-tab{flex:1;padding:8px 6px;text-align:center;font-size:11px;font-weight:500;color:var(--text3);background:var(--bg);border-right:1px solid var(--border);cursor:default}
+.step-tab:last-child{border-right:none}
+.step-tab.active{background:var(--dark);color:#fff}
+.step-tab.done{background:var(--green-bg);color:var(--green-t)}
+/* FORM */
+.fg{margin-bottom:13px}
+.fg:last-child{margin-bottom:0}
+.fg label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 11px;border:1px solid var(--border-m);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--dark)}
+.fg textarea{resize:vertical;min-height:64px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.dept-note{background:var(--blue-bg);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--blue-t);line-height:1.6}
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding-bottom:6px;border-bottom:1px solid var(--border);margin:16px 0 9px}
+/* COMP BLOCKS */
+.cblock{border:1px solid var(--border);border-radius:var(--r);margin-bottom:9px;overflow:hidden;background:var(--surface)}
+.cblock-head{padding:11px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.cblock-left{flex:1;min-width:0}
+.cblock-name{font-size:13px;font-weight:600;margin-top:3px}
+.cblock-desc{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.5}
+.guide-btn{font-size:11px;color:var(--blue);background:var(--blue-bg);border:none;padding:4px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.guide-panel{display:none;padding:11px 14px;background:#FAFAF8;border-top:1px solid var(--border)}
+.guide-panel.open{display:block}
+.gl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px;margin-top:9px}
+.gl:first-child{margin-top:0}
+.qlist{list-style:none}
+.qlist li{font-size:11px;color:var(--text);line-height:1.6;padding:3px 0 3px 13px;position:relative;border-bottom:1px solid var(--border)}
+.qlist li:last-child{border-bottom:none}
+.qlist li::before{content:"?";position:absolute;left:0;top:3px;font-size:10px;font-weight:700;color:var(--text3)}
+.flags{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.flag{padding:7px 9px;border-radius:7px}
+.flag.g{background:var(--green-bg)}
+.flag.r{background:var(--red-bg)}
+.flag-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.flag.g .flag-title{color:var(--green-t)}
+.flag.r .flag-title{color:var(--red-t)}
+.flag-item{font-size:11px;color:var(--text);line-height:1.5}
+.destr{background:var(--amber-bg);border-radius:7px;padding:6px 9px;margin-top:7px;font-size:11px;color:var(--amber-t);line-height:1.5}
+/* DUAL SCORE ROW */
+.cblock-score{padding:8px 14px;background:var(--bg);border-top:1px solid var(--border)}
+.score-section{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:4px 0}
+.score-section + .score-section{border-top:1px solid var(--border);margin-top:4px}
+.score-who{font-size:11px;font-weight:700;min-width:80px;color:var(--text2)}
+.score-who.rec{color:var(--blue-t)}
+.score-who.mgr{color:var(--orange-t)}
+.stars{display:flex;gap:3px}
+.star{width:25px;height:25px;border-radius:5px;border:1px solid var(--border-m);background:var(--surface);cursor:pointer;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .1s}
+.star.on-rec{background:var(--blue-bg);color:var(--blue-t);border-color:#85B7EB}
+.star.on-mgr{background:var(--orange-bg);color:var(--orange-t);border-color:#F0B27A}
+.star.readonly{cursor:default;pointer-events:none}
+.nabtn{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border-m);background:var(--surface);cursor:pointer;color:var(--text2)}
+.nabtn.on{background:var(--bg);color:var(--text3)}
+.notebtn{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;margin-left:auto}
+.note-area{display:none;padding:0 14px 9px;background:var(--bg);border-top:1px solid var(--border)}
+.note-area.open{display:block}
+.note-area textarea{width:100%;font-size:12px;border:1px solid var(--border-m);border-radius:6px;padding:6px 9px;min-height:40px;resize:vertical}
+.note-area textarea:focus{outline:none;border-color:var(--dark)}
+.rec-note-lbl{font-size:11px;color:var(--blue-t);font-weight:600;margin-bottom:4px}
+.mgr-note-lbl{font-size:11px;color:var(--orange-t);font-weight:600;margin-bottom:4px;margin-top:8px}
+.readonly-note{font-size:12px;color:var(--text2);background:var(--blue-bg);border-radius:6px;padding:6px 9px;line-height:1.5;margin-top:4px}
+/* GATE */
+.gate-row{padding:8px 14px;background:var(--bg);border-top:1px solid var(--border)}
+.gate-btns{display:flex;gap:7px}
+.gbtn{flex:1;padding:7px;border-radius:7px;border:1px solid var(--border-m);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);text-align:center;transition:all .15s}
+.gbtn:hover{background:var(--bg)}
+.gbtn.yes{background:var(--green-bg);color:var(--green-t);border-color:var(--green-b)}
+.gbtn.no{background:var(--red-bg);color:var(--red-t);border-color:var(--red-b)}
+/* VERDICT */
+.vbtns{display:flex;gap:7px}
+.vbtn{flex:1;padding:9px;border-radius:7px;border:1px solid var(--border-m);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);text-align:center;transition:all .15s}
+.vbtn:hover{background:var(--bg)}
+.vbtn.hire{background:var(--green-bg);color:var(--green-t);border-color:var(--green-b)}
+.vbtn.hold{background:var(--amber-bg);color:var(--amber-t);border-color:var(--amber-b)}
+.vbtn.decline{background:var(--red-bg);color:var(--red-t);border-color:var(--red-b)}
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.sum-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px}
+.sum-box-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.sum-box-val{font-size:20px;font-weight:700;color:var(--text)}
+/* SHARE BOX */
+.share-box{background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r);padding:14px 16px;margin-top:16px}
+.share-box-title{font-size:13px;font-weight:700;color:var(--green-t);margin-bottom:6px}
+.share-box-desc{font-size:12px;color:var(--green-t);margin-bottom:10px;line-height:1.6;opacity:.85}
+.code-box{display:flex;gap:8px;align-items:center}
+.code-display{flex:1;font-family:monospace;font-size:12px;background:var(--surface);border:1px solid var(--green-b);border-radius:7px;padding:8px 12px;color:var(--dark);word-break:break-all;line-height:1.5}
+/* IMPORT BOX */
+.import-box{background:var(--orange-bg);border:1px solid #F0B27A;border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
+.import-box-title{font-size:13px;font-weight:700;color:var(--orange-t);margin-bottom:6px}
+.import-inp-row{display:flex;gap:8px}
+.import-inp{flex:1;font-family:monospace;font-size:12px;border:1px solid #F0B27A;border-radius:7px;padding:8px 12px;background:var(--surface);color:var(--dark)}
+.import-inp:focus{outline:none;border-color:var(--orange)}
+/* DETAIL */
+.det-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:40;display:none}
+.det-overlay.show{display:block}
+.det-panel{position:fixed;right:0;top:0;bottom:0;width:500px;background:var(--surface);z-index:45;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .25s}
+.det-panel.show{transform:translateX(0)}
+.det-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.det-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:500}
+.det-meta{font-size:12px;color:var(--text2);margin-top:3px}
+.det-body{flex:1;overflow-y:auto;padding:18px 22px}
+.det-row{padding:8px 0;border-bottom:1px solid var(--border)}
+.det-row:last-child{border-bottom:none}
+.det-row-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px}
+.score-compare{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dots{display:flex;gap:3px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.dot.on-rec{background:var(--blue)}
+.dot.on-mgr{background:var(--orange)}
+.gate-status{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+.gs-pass{background:var(--green-bg);color:var(--green-t)}
+.gs-fail{background:var(--red-bg);color:var(--red-t)}
+/* ROLE SELECTOR */
+.role-selector{display:flex;gap:10px;margin-bottom:20px}
+.role-card{flex:1;padding:14px 16px;border-radius:var(--r);border:2px solid var(--border);cursor:pointer;transition:all .15s;text-align:center}
+.role-card:hover{border-color:var(--border-m)}
+.role-card.selected-rec{border-color:var(--blue);background:var(--blue-bg)}
+.role-card.selected-mgr{border-color:var(--orange);background:var(--orange-bg)}
+.role-card-icon{font-size:22px;margin-bottom:6px}
+.role-card-title{font-size:13px;font-weight:700;color:var(--text)}
+.role-card-desc{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.empty{text-align:center;padding:52px 20px;color:var(--text3)}
+.empty p{font-size:13px;margin-top:8px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border-m);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="app">
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-name">LIM<em>É</em></div>
+    <div class="logo-sub">Оценка компетенций</div>
+  </div>
+  <div class="nav">
+    <div class="nav-label">Workspace</div>
+    <button class="nav-btn active" id="nb-dash" onclick="showPage('dash',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Дашборд
+    </button>
+    <button class="nav-btn" id="nb-cands" onclick="showPage('cands',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Кандидаты
+    </button>
+    <div class="nav-label">Инструменты</div>
+    <button class="nav-btn" onclick="openModal('library')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Библиотека
+    </button>
+    <button class="nav-btn" onclick="openModal('leadership')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Лидерская модель
+    </button>
+    <button class="nav-btn" onclick="openImportModal()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Открыть по коду
+    </button>
+  </div>
+</nav>
+<div class="main-area">
+  <!-- DASHBOARD -->
+  <div class="page show" id="page-dash">
+    <div class="page-header">
+      <div><div class="page-title">Дашборд</div><div class="page-sub">Аналитика по оценённым кандидатам</div></div>
+      <button class="btn btn-dark" onclick="openModal('library')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Новая оценка
+      </button>
+    </div>
+    <div class="page-content">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title">Вердикты</div><div class="chart-sub">Распределение решений</div><div id="chart-verdicts"></div></div>
+        <div class="chart-card"><div class="chart-title">Средние баллы</div><div class="chart-sub">Топ компетенций</div><div id="chart-comps"></div></div>
+      </div>
+      <div class="chart-card"><div class="chart-title">Воронка: Gate → Оффер</div><div class="chart-sub">Конверсия по этапам</div><div id="chart-funnel"></div></div>
+    </div>
+  </div>
+  <!-- CANDIDATES -->
+  <div class="page" id="page-cands">
+    <div class="page-header">
+      <div><div class="page-title">Кандидаты</div><div class="page-sub" id="cands-sub"></div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-wrap">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-inp" type="text" id="search-inp" placeholder="Поиск..." oninput="renderCands()">
+        </div>
+        <button class="btn btn-dark" onclick="openModal('library')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Новая оценка
+        </button>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="filter-row">
+        <span>Статус:</span>
+        <button class="chip on" onclick="setFilt('all',this)">Все</button>
+        <button class="chip" onclick="setFilt('recruiter',this)">Только рекрутер</button>
+        <button class="chip" onclick="setFilt('complete',this)">Оба заполнили</button>
+        <span style="margin-left:4px">Вердикт:</span>
+        <button class="chip" onclick="setFilt('hire',this)">✅ Нанять</button>
+        <button class="chip" onclick="setFilt('decline',this)">❌ Отказ</button>
+      </div>
+      <div class="card-table" id="cands-table-wrap"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MAIN MODAL -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Новая оценка</div>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="step-tabs" id="step-tabs"></div>
+      <div id="step-body"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="btn-prev">← Назад</button>
+      <button class="btn btn-dark" id="btn-next">Далее →</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="overlay" id="import-overlay">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <div class="modal-title">Открыть карточку по коду</div>
+      <button class="modal-close" id="import-close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">Рекрутер заполнил карточку и поделился кодом. Вставьте код ниже чтобы открыть её и добавить оценку менеджера.</p>
+      <div class="fg">
+        <label>Код карточки от рекрутера</label>
+        <textarea id="import-code-inp" style="min-height:80px;font-family:monospace;font-size:12px" placeholder="Вставьте код сюда..."></textarea>
+      </div>
+      <div id="import-error" style="font-size:12px;color:var(--red-t);margin-top:4px;display:none">Неверный код — проверьте что скопировали полностью</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="import-cancel-btn">Отмена</button>
+      <button class="btn btn-orange" id="import-confirm-btn">Открыть карточку →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="det-overlay" id="det-overlay"></div>
+<div class="det-panel" id="det-panel">
+  <div class="det-head">
+    <div><div class="det-name" id="dp-name"></div><div class="det-meta" id="dp-meta"></div></div>
+    <button class="modal-close" id="det-close-btn">✕</button>
+  </div>
+  <div class="det-body" id="dp-body"></div>
+</div>
+
+<script>
+// ===== DATA =====
+var DEPT_MAP={'Commerce · Buyer':{req:['LB-03','LB-06','LB-10'],opt:['LB-01','LB-08']},'Commerce · Product':{req:['LB-09','LB-03','LB-06'],opt:['LB-12','LB-10']},'Commerce · Technologist & Pattern Maker':{req:['LB-07','LB-06','LB-10'],opt:['LB-12','LB-11']},'Commerce · Designer':{req:['LB-09','LB-03','LB-06'],opt:['LB-12','LB-11']},'Commerce · Quality Control':{req:['LB-07','LB-01','LB-10'],opt:['LB-08','LB-12']},'Commerce · Distribution & Commercial Controlling':{req:['LB-01','LB-06','LB-03'],opt:['LB-08','LB-10']},'Commerce · Production Manager':{req:['LB-06','LB-07','LB-08'],opt:['LB-10','LB-12']},'Marketing':{req:['LB-03','LB-05','LB-09'],opt:['LB-04','LB-11']},'IT':{req:['LB-01','LB-06','LB-07'],opt:['LB-08','LB-10']},'PMO':{req:['LB-01','LB-02','LB-06'],opt:['LB-10','LB-08']},'Retail':{req:['LB-09','LB-08','LB-11'],opt:['LB-05','LB-03','LB-12']},'Operations':{req:['LB-06','LB-08','LB-07'],opt:['LB-02','LB-10']},'Construction & Architecture':{req:['LB-06','LB-07','LB-08'],opt:['LB-02','LB-10']},'Expansion':{req:['LB-06','LB-02','LB-08'],opt:['LB-10','LB-03']},'Loss Prevention':{req:['LB-07','LB-01','LB-04'],opt:['LB-12','LB-08']},'Finance':{req:['LB-01','LB-07','LB-06'],opt:['LB-03','LB-10']},'Legal':{req:['LB-01','LB-07','LB-04'],opt:['LB-02','LB-06']},'HR':{req:['LB-09','LB-04','LB-01'],opt:['LB-05','LB-11']},'E-commerce':{req:['LB-09','LB-03','LB-01'],opt:['LB-11','LB-08']}};
+var LIB={'LB-01':{name:'Аналитическое мышление',desc:'Анализирует ситуации, выявляет паттерны',q:['Опишите сложную проблему которую пришлось разобрать. Как подходили?','Как принимаете решения когда данных недостаточно?','Расскажите когда заметили паттерн раньше других.'],g:['Структурирует проблему, разбивает на части','Объясняет логику, опирается на данные','Замечает системные связи'],r:['Тонет в деталях, теряет картину','Решения по ощущению'],d:'Анализ становится самоцелью — действие откладывается.'},'LB-02':{name:'Работа с неопределённостью',desc:'Действует без полной информации',q:['Расскажите когда нужно было действовать без чёткого понимания.','Как даёте ориентиры когда сами не знаете ответа?'],g:['Принимает решения при неполных данных','Не транслирует тревогу команде'],r:['Ждёт полной ясности','Постоянно эскалирует вопросы'],d:'Комфорт в хаосе — структура не создаётся.'},'LB-03':{name:'Коммерческое мышление',desc:'Видит связь решений с финансовым результатом',q:['Как ваша работа влияет на выручку или маржу?','Расскажите о решении где учли бизнес-эффект.'],g:['Говорит о работе через метрики','Оценивает по ценности для бизнеса'],r:['Не видит связи с финрезультатом','Оценивает только по качеству'],d:'Оптимизирует краткосрочный результат в ущерб бренду.'},'LB-04':{name:'Убеждение и влияние',desc:'Убеждает через аргументы, ищет компромисс',q:['Расскажите когда убеждали людей в идее — что сработало?','Как реагируете на возражения?'],g:['Адаптирует аргументы под аудиторию','Работает с возражениями','Находит компромисс'],r:['Продавливает без учёта другой стороны','При несогласии замолкает'],d:'Убеждает так хорошо что продавливает неверные решения.'},'LB-05':{name:'Эффективная коммуникация',desc:'Ясно передаёт информацию, адаптирует стиль',q:['Как объясняете сложные вещи людям без подготовки?','Как убеждаетесь что вас поняли?'],g:['Формулирует чётко с первого раза','Адаптирует стиль','Слушает активно'],r:['Объясняет сложно','Не слышит собеседника'],d:'Так много объясняет что действие откладывается.'},'LB-06':{name:'Планирование и организация',desc:'Расставляет приоритеты, держит сроки',q:['Как расставляете приоритеты когда всё срочно?','Расскажите о проекте с несколькими зависимостями.'],g:['Разграничивает важное и срочное','Предупреждает о рисках заранее'],r:['Нарушает сроки без предупреждения','Планирует без учёта зависимостей'],d:'План важнее реальности.'},'LB-07':{name:'Ориентация на качество',desc:'Держит высокий стандарт результата',q:['Как проверяете работу перед тем как передать дальше?','Расскажите когда заметили проблему с качеством раньше других.'],g:['Проверяет работу сам','Замечает детали влияющие на итог'],r:['Сдаёт «как есть»','Не видит разницы между сделано и хорошо'],d:'Перфекционизм сдвигает сроки.'},'LB-08':{name:'Ориентация на результат',desc:'Нацелен на исход, берёт инициативу',q:['Расскажите когда достигли результата вопреки препятствиям.','Бывало ли что брали инициативу без поручения?'],g:['Фокус на исходе, не процессе','Берёт инициативу'],r:['«Я сделал что от меня зависело»','Ждёт идеальных условий'],d:'Доводит до конца даже то что потеряло смысл.'},'LB-09':{name:'Клиентоориентированность',desc:'Ставит потребности клиента в центр',q:['Как учитываете потребности клиента при решениях?','Опишите типичного покупателя LIMÉ.'],g:['Решения с вопросом «что даст клиенту»','Знает реальные боли клиента'],r:['Клиент — абстракция','Внутренние процессы важнее'],d:'Говорит да любому запросу.'},'LB-10':{name:'Взаимодействие со смежными',desc:'Эффективно работает на стыке функций',q:['Расскажите о кросс-функциональном проекте.','Как поступаете когда интересы расходятся?'],g:['Проактивно информирует смежников','Ищет решение для всех'],r:['Смежники узнают последними','«Это не моя зона»'],d:'Берёт чужие задачи в ущерб своим.'},'LB-11':{name:'Гибкость и адаптивность',desc:'Перестраивается при изменении условий',q:['Расскажите когда условия изменились в середине проекта.','Как поступаете когда прежний подход не работает?'],g:['Замечает изменения и перестраивается','Меняет подход без сопротивления'],r:['Держится за привычный подход','Изменения как угроза'],d:'Меняется под любой запрос — позиция исчезает.'},'LB-12':{name:'Стрессоустойчивость',desc:'Сохраняет эффективность под давлением',q:['Расскажите о самом напряжённом периоде.','Как ведёте себя после серьёзной неудачи?'],g:['Сохраняет качество суждений','Анализирует неудачу и движется дальше'],r:['Решения реактивны под давлением','Неудача выбивает надолго'],d:'Спокойствие без сигнала — команда не чувствует срочности.'}};
+var GATE_DATA=[{id:'GT-01',name:'Целостность · Integrity',desc:'Честность, слова не меняются в зависимости от аудитории',q:['Расскажите когда было сложно сказать правду руководителю.','Бывало ли что говорили разным людям разные вещи?','Как поступаете если видите риск но руководство оптимистично?'],g:['Одинаково формулирует для всех','Называет проблемы прямо','Меняет позицию только под аргументами'],r:['Разные версии для руководителя и команды','Меняет позицию под давлением']},{id:'GT-02',name:'Профессионализм · Professionalism',desc:'Надёжен в результате, сроках и отношении к людям. АБСОЛЮТНО КРИТИЧЕН',q:['Расскажите когда не успевали выполнить договорённость — что сделали?','Как реагируете когда что-то идёт не так?','Как ведёте себя под сильным давлением?'],g:['Предупреждает заранее при риске срыва','При неудаче фокус на решении','Уважителен со всеми'],r:['О проблемах говорит постфактум','При провале называет виноватых']},{id:'GT-03',name:'Интерес к индустрии моды',desc:'Искренне интересуется fashion, следит за трендами',q:['Какие бренды или тренды отслеживаете? Почему?','Как бы описали покупателя LIMÉ?'],g:['Говорит о трендах с реальным интересом','Понимает клиента LIMÉ как реального человека'],r:['Fashion — просто работа','Не знает актуальных трендов']}];
+var LEAD_L3=[{id:'LM-02',name:'Управление через стандарт',w:30,desc:'Устанавливает чёткие стандарты, следит за соблюдением',q:['Как устанавливаете стандарты? Как реагируете на отклонения?','Расскажите когда кто-то не выполнил договорённость.'],g:['Чёткие стандарты без исключений','Разбирает отклонения — ищет причину'],r:['Стандарты размыты','Двойные стандарты'],d:'Стандарт важнее результата.'},{id:'LM-01',name:'Бизнес-анализ',w:25,desc:'Понимает как решения влияют на результат',q:['Какие ключевые показатели вашего направления?','Расскажите о решении где предложили вариант с расчётом.'],g:['Знает KPI и их связь с бизнесом','Предлагает варианты с расчётом'],r:['Не знает KPI','«Так всегда было»'],d:'Анализирует вместо того чтобы решать.'},{id:'LM-03',name:'Вовлечённость команды',w:25,desc:'Знает мотиваторы каждого, создаёт среду',q:['Что мотивирует каждого в команде?','Как создаёте атмосферу где можно признать ошибку?'],g:['Знает мотиваторы каждого','Конкретная позитивная ОС'],r:['Не знает чем живёт команда','ОС только негативная'],d:'Комфорт команды важнее сложных разговоров.'},{id:'LM-04',name:'Обучаемость в действии',w:20,desc:'Учится на ОС и ошибках',q:['Расскажите когда получили неудобную ОС. Как отреагировали?','Пример когда изменили поведение после ОС.'],g:['Меняет поведение после ОС','Пробует, анализирует, корректирует'],r:['На ОС реагирует защитой','Делает привычным способом'],d:'Принимает всё новое без фильтра.'}];
+var LEAD_L4=[{id:'LM-05',name:'Стратегическое мышление',w:30,desc:'Видит горизонт 1–3 года',q:['Какие изменения в отрасли ожидаете через 1–2 года?','Как связываете решения со стратегией?'],g:['Готовит команду к изменениям заранее','Объясняет тактику через стратегию'],r:['Горизонт — следующий месяц','Реагирует постфактум'],d:'Живёт в будущем — теряет контроль.'},{id:'LM-06',name:'Системный результат',w:25,desc:'Создаёт условия без личного участия в каждой задаче',q:['Как команда работает без вашего личного участия?','Расскажите когда изменили систему, а не давили на людей.'],g:['Создаёт условия без личного контроля','Меняет систему'],r:['Результат только под личным контролем','«Команда подвела»'],d:'Давит на результат любой ценой.'},{id:'LM-07',name:'Развитие людей',w:25,desc:'Думает о преемниках, инвестирует в людей',q:['Кто готов к росту прямо сейчас? Что делаете?','Кто ваш преемник? Как готовите?'],g:['Знает кто готов к росту','Открыто о карьерных перспективах'],r:['Держит сильных на месте','IDP написан — разговоров нет'],d:'Развивает всех одинаково.'},{id:'LM-08',name:'Осознанность лидера',w:20,desc:'Понимает как стиль влияет на команду',q:['Как ваш стиль влияет на команду?','Расскажите о неудобной ОС о себе как лидере.'],g:['Знает как стиль влияет и корректирует','Принимает ОС без защиты'],r:['Не замечает влияния','ОС как личная атака'],d:'Рефлексирует так много что теряет решительность.'}];
+
+// ===== STATE =====
+var mode='library',step=0,fd={},scRec={},scMgr={},ga={},ntRec={},ntMgr={},openGuides={},openNotes={},verdict='',activeFilter='all',currentRole='recruiter',editingRecord=null;
+
+// ===== DB =====
+function getDB(){try{return JSON.parse(localStorage.getItem('lime_v3')||'[]');}catch(e){return[];}}
+function saveDB(d){localStorage.setItem('lime_v3',JSON.stringify(d));}
+
+// ===== NAV =====
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('show');});
+  document.getElementById('page-'+id).classList.add('show');
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  if(id==='dash')renderDash();
+  if(id==='cands')renderCands();
+}
+
+// ===== MODAL =====
+function openModal(m){
+  mode=m; step=0; fd={}; scRec={}; scMgr={}; ga={}; ntRec={}; ntMgr={};
+  openGuides={}; openNotes={}; verdict=''; currentRole='recruiter'; editingRecord=null;
+  document.getElementById('modal-title').textContent=m==='library'?'Оценка — Библиотека компетенций':'Оценка — Лидерская модель';
+  renderTabs(); renderStepBody();
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+function renderTabs(){
+  var labels=['Роль','Кандидат','Gate','Компетенции','Итог'];
+  var html='';
+  for(var i=0;i<labels.length;i++){
+    var cls='';
+    if(i===step)cls=' active';
+    else if(i<step)cls=' done';
+    html+='<div class="step-tab'+cls+'">'+labels[i]+'</div>';
+  }
+  document.getElementById('step-tabs').innerHTML=html;
+  document.getElementById('btn-prev').style.visibility=step===0?'hidden':'visible';
+  document.getElementById('btn-next').textContent=step===4?'💾 Сохранить':'Далее →';
+}
+function goNext(){if(step===4){saveRecord();return;}step++;renderTabs();renderStepBody();}
+function goPrev(){if(step===0)return;step--;renderTabs();renderStepBody();}
+function renderStepBody(){
+  var body=document.getElementById('step-body');
+  if(step===0)body.innerHTML=buildRoleStep();
+  else if(step===1)body.innerHTML=buildMeta();
+  else if(step===2)body.innerHTML=buildGate();
+  else if(step===3)body.innerHTML=mode==='library'?buildLibrary():buildLeadership();
+  else body.innerHTML=buildSummary();
+}
+
+// STEP 0: ROLE
+function buildRoleStep(){
+  var recSel=currentRole==='recruiter'?'selected-rec':'';
+  var mgrSel=currentRole==='manager'?'selected-mgr':'';
+  return '<p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">Выберите кто вы — это определит какие поля вы будете заполнять. Рекрутер заполняет карточку первым, затем делится кодом с менеджером.</p>'
+    +'<div class="role-selector">'
+    +'<div class="role-card '+recSel+'" id="role-rec" onclick="selectRole(\'recruiter\')">'
+    +'<div class="role-card-icon">🔍</div>'
+    +'<div class="role-card-title">Я рекрутер</div>'
+    +'<div class="role-card-desc">Заполняю карточку первым. После сохранения получу код для менеджера.</div>'
+    +'</div>'
+    +'<div class="role-card '+mgrSel+'" id="role-mgr" onclick="selectRole(\'manager\')">'
+    +'<div class="role-card-icon">👔</div>'
+    +'<div class="role-card-title">Я нанимающий менеджер</div>'
+    +'<div class="role-card-desc">Открываю карточку рекрутера по коду и добавляю свои оценки.</div>'
+    +'</div>'
+    +'</div>';
+}
+function selectRole(r){
+  currentRole=r;
+  var rec=document.getElementById('role-rec');
+  var mgr=document.getElementById('role-mgr');
+  if(rec)rec.className='role-card'+(r==='recruiter'?' selected-rec':'');
+  if(mgr)mgr.className='role-card'+(r==='manager'?' selected-mgr':'');
+}
+
+// STEP 1: META
+function buildMeta(){
+  var depts=Object.keys(DEPT_MAP);
+  var deptOpts=depts.map(function(d){return '<option value="'+d+'"'+(fd.dept===d?' selected':'')+'>'+d+'</option>';}).join('');
+  var levelOpts=['L1 · Специалист нач.','L2 · Опытный специалист','L3 · Manager / Team Lead','L4 · Head of / Director','L5+ · C-Level'].map(function(l){return '<option'+(fd.level===l?' selected':'')+'>'+l+'</option>';}).join('');
+  var deptRow=mode==='library'?'<div class="fg"><label>Департамент</label><select id="f-dept" onchange="fd.dept=this.value"><option value="">— выбрать —</option>'+deptOpts+'</select></div>':'';
+  return '<div class="grid2">'
+    +'<div class="fg"><label>ФИО кандидата</label><input value="'+(fd.name||'')+'" placeholder="Иванова Мария Сергеевна" oninput="fd.name=this.value"></div>'
+    +'<div class="fg"><label>Вакансия</label><input value="'+(fd.pos||'')+'" placeholder="Название позиции" oninput="fd.pos=this.value"></div>'
+    +'<div class="fg"><label>Рекрутер</label><input value="'+(fd.rec||'')+'" placeholder="Имя рекрутера" oninput="fd.rec=this.value"></div>'
+    +'<div class="fg"><label>Нанимающий менеджер</label><input value="'+(fd.hm||'')+'" placeholder="Имя менеджера" oninput="fd.hm=this.value"></div>'
+    +'<div class="fg"><label>Дата</label><input type="date" value="'+(fd.date||'')+'" oninput="fd.date=this.value"></div>'
+    +'<div class="fg"><label>Уровень</label><select onchange="fd.level=this.value"><option value="">— выбрать —</option>'+levelOpts+'</select></div>'
+    +'</div>'+deptRow;
+}
+
+// STEP 2: GATE
+function buildGate(){
+  return GATE_DATA.map(function(g){return buildGateCard(g);}).join('');
+}
+function buildGateCard(g){
+  var isOpen=openGuides[g.id];
+  var isManagerMode=currentRole==='manager'&&editingRecord;
+  var recVal=isManagerMode?(editingRecord.gate[g.id]||null):ga[g.id];
+  var scoreSection='';
+  if(isManagerMode){
+    var recLabel=recVal==='yes'?'✅ ДА':'🚩 НЕТ';
+    var recCls=recVal==='yes'?'yes':'no';
+    scoreSection='<div class="gate-row">'
+      +'<div style="font-size:11px;color:var(--blue-t);font-weight:600;margin-bottom:6px">Оценка рекрутера</div>'
+      +'<div class="gbtn '+recCls+'" style="cursor:default;text-align:center">'+recLabel+'</div>'
+      +'</div>';
+  } else {
+    scoreSection='<div class="gate-row"><div class="gate-btns">'
+      +'<button class="gbtn'+(ga[g.id]==='yes'?' yes':'')+'" onclick="setGA(\''+g.id+'\',\'yes\')">✅ ДА — соответствует</button>'
+      +'<button class="gbtn'+(ga[g.id]==='no'?' no':'')+'" onclick="setGA(\''+g.id+'\',\'no\')">🚩 НЕТ — красный флаг</button>'
+      +'</div></div>';
+  }
+  return '<div class="cblock" id="cb-'+g.id+'">'
+    +'<div class="cblock-head">'
+    +'<div class="cblock-left"><span class="badge b-red" style="font-size:10px">'+g.id+'</span><div class="cblock-name">'+g.name+'</div><div class="cblock-desc">'+g.desc+'</div></div>'
+    +'<button class="guide-btn" id="gbtn-'+g.id+'" onclick="toggleGuide(\''+g.id+'\')">'+( isOpen?'Скрыть':'Подсказка')+'</button>'
+    +'</div>'
+    +'<div class="guide-panel'+(isOpen?' open':'')+'" id="gp-'+g.id+'">'
+    +'<div class="gl">Вопросы</div><ul class="qlist">'+g.q.map(function(q){return '<li>'+q+'</li>';}).join('')+'</ul>'
+    +'<div class="flags"><div class="flag g"><div class="flag-title">Зелёные флаги</div>'+g.g.map(function(x){return '<div class="flag-item">+ '+x+'</div>';}).join('')+'</div>'
+    +'<div class="flag r"><div class="flag-title">Красные флаги</div>'+g.r.map(function(x){return '<div class="flag-item">— '+x+'</div>';}).join('')+'</div></div>'
+    +'</div>'
+    +scoreSection
+    +'</div>';
+}
+function setGA(id,val){
+  ga[id]=val;
+  var btns=document.querySelectorAll('#cb-'+id+' .gbtn');
+  if(btns[0])btns[0].className='gbtn'+(val==='yes'?' yes':'');
+  if(btns[1])btns[1].className='gbtn'+(val==='no'?' no':'');
+}
+
+// STEP 3: LIBRARY / LEADERSHIP
+function buildLibrary(){
+  var dept=fd.dept;
+  if(!dept)return '<div style="color:var(--text2);font-size:13px;padding:8px 0">Выберите департамент на первом шаге</div>';
+  var map=DEPT_MAP[dept];if(!map)return'';
+  var reqN=map.req.map(function(id){return LIB[id]?LIB[id].name:id;}).join(', ');
+  var optN=map.opt.map(function(id){return LIB[id]?LIB[id].name:id;}).join(', ');
+  return '<div class="dept-note">Обязательные: <strong>'+reqN+'</strong><br>На выбор: '+optN+'</div>'
+    +'<div class="sec-lbl">Обязательные</div>'+map.req.map(function(id){return buildCompCard(id,'b-blue','Обязательная',LIB[id]);}).join('')
+    +'<div class="sec-lbl">На выбор</div>'+map.opt.map(function(id){return buildCompCard(id,'b-gray','На выбор',LIB[id]);}).join('');
+}
+function buildLeadership(){
+  var lv=fd.level||'';
+  var isL3=lv.indexOf('L3')===0;var isL4=lv.indexOf('L4')===0||lv.indexOf('L5')===0;
+  if(!isL3&&!isL4)return '<div style="color:var(--text2);font-size:13px;padding:8px 0">Выберите уровень L3, L4 или L5+ на шаге «Кандидат»</div>';
+  var comps=isL3?LEAD_L3:LEAD_L4;
+  return '<div class="dept-note">'+(isL3?'Manager · L3':'Head of · L4–L5')+'</div>'+comps.map(function(c){return buildCompCard(c.id,'b-green','вес '+c.w+'%',{name:c.name,desc:c.desc,q:c.q,g:c.g,r:c.r,d:c.d});}).join('');
+}
+
+function buildCompCard(id,badgeCls,badgeLabel,comp){
+  if(!comp)return'';
+  var isOpen=openGuides[id];
+  var isManagerMode=currentRole==='manager'&&editingRecord;
+  var isNoteOpen=openNotes[id];
+  var curRec=scRec[id]||0;
+  var curMgr=scMgr[id]||0;
+
+  // Recruiter score section
+  var recStarsHtml='';
+  for(var n=1;n<=5;n++){
+    var onCls=curRec!=='na'&&curRec>=n?' on-rec':'';
+    if(isManagerMode){recStarsHtml+='<div class="star'+onCls+' readonly">'+n+'</div>';}
+    else{recStarsHtml+='<div class="star'+onCls+'" onclick="setScRec(\''+id+'\','+n+')">'+n+'</div>';}
+  }
+  var recNAcls=scRec[id]==='na'?' on':'';
+  var recNAbtn=isManagerMode?''
+    :'<button class="nabtn'+recNAcls+'" id="nabtn-rec-'+id+'" onclick="setNARec(\''+id+'\')">Н/П</button>';
+
+  // Manager score section
+  var mgrStarsHtml='';
+  for(var m=1;m<=5;m++){
+    var mOnCls=curMgr!=='na'&&curMgr>=m?' on-mgr':'';
+    if(!isManagerMode){mgrStarsHtml+='<div class="star'+mOnCls+' readonly">'+m+'</div>';}
+    else{mgrStarsHtml+='<div class="star'+mOnCls+'" onclick="setScMgr(\''+id+'\','+m+')">'+m+'</div>';}
+  }
+  var mgrNAcls=scMgr[id]==='na'?' on':'';
+  var mgrNAbtn=isManagerMode?'<button class="nabtn'+mgrNAcls+'" id="nabtn-mgr-'+id+'" onclick="setNAMgr(\''+id+'\')">Н/П</button>':'';
+
+  // Recruiter note
+  var recNoteHtml='';
+  if(isNoteOpen){
+    if(isManagerMode&&editingRecord&&editingRecord.notesRec&&editingRecord.notesRec[id]){
+      recNoteHtml='<div class="rec-note-lbl">Заметка рекрутера</div><div class="readonly-note">'+editingRecord.notesRec[id]+'</div>';
+    } else if(!isManagerMode){
+      recNoteHtml='<div class="rec-note-lbl">Заметка рекрутера</div><textarea placeholder="Поведенческие примеры..." rows="2" oninput="ntRec[\''+id+'\']=this.value">'+(ntRec[id]||'')+'</textarea>';
+    }
+    if(isManagerMode){
+      recNoteHtml+='<div class="mgr-note-lbl">Заметка менеджера</div><textarea placeholder="Ваши наблюдения..." rows="2" oninput="ntMgr[\''+id+'\']=this.value">'+(ntMgr[id]||'')+'</textarea>';
+    }
+  }
+
+  return '<div class="cblock" id="cb-'+id+'">'
+    +'<div class="cblock-head">'
+    +'<div class="cblock-left"><span class="badge '+badgeCls+'" style="font-size:10px">'+badgeLabel+' · '+id+'</span><div class="cblock-name">'+comp.name+'</div><div class="cblock-desc">'+comp.desc+'</div></div>'
+    +'<button class="guide-btn" id="gbtn-'+id+'" onclick="toggleGuide(\''+id+'\')">'+( isOpen?'Скрыть':'Подсказка')+'</button>'
+    +'</div>'
+    +'<div class="guide-panel'+(isOpen?' open':'')+'" id="gp-'+id+'">'
+    +'<div class="gl">Вопросы</div><ul class="qlist">'+comp.q.map(function(q){return '<li>'+q+'</li>';}).join('')+'</ul>'
+    +'<div class="flags"><div class="flag g"><div class="flag-title">Зелёные флаги</div>'+comp.g.map(function(x){return '<div class="flag-item">+ '+x+'</div>';}).join('')+'</div>'
+    +'<div class="flag r"><div class="flag-title">Красные флаги</div>'+comp.r.map(function(x){return '<div class="flag-item">— '+x+'</div>';}).join('')+'</div></div>'
+    +(comp.d?'<div class="destr">⚡ Деструктор: '+comp.d+'</div>':'')
+    +'</div>'
+    +'<div class="cblock-score">'
+    +'<div class="score-section"><span class="score-who rec">🔍 Рекрутер</span><div class="stars" id="stars-rec-'+id+'">'+recStarsHtml+'</div>'+recNAbtn+'<button class="notebtn" onclick="toggleNote(\''+id+'\')">✎</button></div>'
+    +'<div class="score-section"><span class="score-who mgr">👔 Менеджер</span><div class="stars" id="stars-mgr-'+id+'">'+mgrStarsHtml+'</div>'+mgrNAbtn+'</div>'
+    +'</div>'
+    +(isNoteOpen?'<div class="note-area open" id="na-'+id+'">'+recNoteHtml+'</div>':'<div class="note-area" id="na-'+id+'"></div>')
+    +'</div>';
+}
+
+// STEP 4: SUMMARY
+function buildSummary(){
+  var fail=false;var gaKeys=Object.keys(ga);
+  for(var i=0;i<gaKeys.length;i++){if(ga[gaKeys[i]]==='no'){fail=true;break;}}
+  var gateText=gaKeys.length<3?'—':(fail?'🚩 Не пройден':'✅ Пройден');
+  var recNums=[],mgrNums=[];
+  Object.keys(scRec).forEach(function(k){if(typeof scRec[k]==='number')recNums.push(scRec[k]);});
+  Object.keys(scMgr).forEach(function(k){if(typeof scMgr[k]==='number')mgrNums.push(scMgr[k]);});
+  var avgRec=recNums.length?(recNums.reduce(function(a,b){return a+b;},0)/recNums.length).toFixed(1):'—';
+  var avgMgr=mgrNums.length?(mgrNums.reduce(function(a,b){return a+b;},0)/mgrNums.length).toFixed(1):'—';
+  var isManager=currentRole==='manager'&&editingRecord;
+  return '<div class="sum-grid">'
+    +'<div class="sum-box"><div class="sum-box-lbl">Gate</div><div class="sum-box-val" style="font-size:14px">'+gateText+'</div></div>'
+    +'<div class="sum-box"><div class="sum-box-lbl">🔍 Рекрутер (ср.)</div><div class="sum-box-val" style="color:var(--blue-t)">'+avgRec+'</div></div>'
+    +'<div class="sum-box"><div class="sum-box-lbl">👔 Менеджер (ср.)</div><div class="sum-box-val" style="color:var(--orange-t)">'+avgMgr+'</div></div>'
+    +'</div>'
+    +(isManager?'':'<div class="fg"><label>Комментарий рекрутера</label><textarea placeholder="Впечатление, сильные стороны, риски..." oninput="fd.comment=this.value">'+(fd.comment||'')+'</textarea></div>')
+    +(isManager?'<div class="fg"><label>Комментарий менеджера</label><textarea placeholder="Ваши наблюдения и решение..." oninput="fd.commentMgr=this.value">'+(fd.commentMgr||'')+'</textarea></div>':'')
+    +'<div class="fg"><label>Итоговый вердикт</label><div class="vbtns">'
+    +'<button class="vbtn'+(verdict==='hire'?' hire':'')+'" onclick="setVerdict(\'hire\',this)">✅ Нанять</button>'
+    +'<button class="vbtn'+(verdict==='hold'?' hold':'')+'" onclick="setVerdict(\'hold\',this)">⏸ На рассмотрение</button>'
+    +'<button class="vbtn'+(verdict==='decline'?' decline':'')+'" onclick="setVerdict(\'decline\',this)">❌ Отказ</button>'
+    +'</div></div>';
+}
+
+// ===== SCORE HELPERS =====
+function setScRec(id,n){scRec[id]=n;document.querySelectorAll('#stars-rec-'+id+' .star').forEach(function(s,i){s.classList.remove('on-rec','on-mgr');if(i<n)s.classList.add('on-rec');});var nb=document.getElementById('nabtn-rec-'+id);if(nb)nb.classList.remove('on');}
+function setScMgr(id,n){scMgr[id]=n;document.querySelectorAll('#stars-mgr-'+id+' .star').forEach(function(s,i){s.classList.remove('on-rec','on-mgr');if(i<n)s.classList.add('on-mgr');});var nb=document.getElementById('nabtn-mgr-'+id);if(nb)nb.classList.remove('on');}
+function setNARec(id){scRec[id]='na';document.querySelectorAll('#stars-rec-'+id+' .star').forEach(function(s){s.classList.remove('on-rec');});var nb=document.getElementById('nabtn-rec-'+id);if(nb)nb.classList.add('on');}
+function setNAMgr(id){scMgr[id]='na';document.querySelectorAll('#stars-mgr-'+id+' .star').forEach(function(s){s.classList.remove('on-mgr');});var nb=document.getElementById('nabtn-mgr-'+id);if(nb)nb.classList.add('on');}
+function toggleGuide(id){openGuides[id]=!openGuides[id];var el=document.getElementById('gp-'+id);var btn=document.getElementById('gbtn-'+id);if(el)el.classList.toggle('open',!!openGuides[id]);if(btn)btn.textContent=openGuides[id]?'Скрыть':'Подсказка';}
+function toggleNote(id){openNotes[id]=!openNotes[id];renderStepBody();}
+function setVerdict(v,btn){verdict=v;document.querySelectorAll('.vbtn').forEach(function(b){b.classList.remove('hire','hold','decline');});btn.classList.add(v);}
+
+// ===== SAVE =====
+function encodeRecord(rec){
+  try{return btoa(unescape(encodeURIComponent(JSON.stringify(rec))));}catch(e){return'';}
+}
+function decodeRecord(str){
+  try{return JSON.parse(decodeURIComponent(escape(atob(str))));}catch(e){return null;}
+}
+
+function avgNums(obj){
+  var nums=Object.values(obj).filter(function(v){return typeof v==='number';});
+  return nums.length?+(nums.reduce(function(a,b){return a+b;},0)/nums.length).toFixed(1):null;
+}
+
+function saveRecord(){
+  var isManager=currentRole==='manager'&&editingRecord;
+  var rec;
+  if(isManager){
+    rec=JSON.parse(JSON.stringify(editingRecord));
+    rec.scMgr=JSON.parse(JSON.stringify(scMgr));
+    rec.ntMgr=JSON.parse(JSON.stringify(ntMgr));
+    rec.commentMgr=fd.commentMgr||'';
+    rec.verdict=verdict||rec.verdict;
+    rec.avgMgr=avgNums(scMgr);
+    rec.status='complete';
+    // Update in DB
+    var db=getDB();
+    var idx=-1;
+    for(var i=0;i<db.length;i++){if(db[i].id===rec.id){idx=i;break;}}
+    if(idx>=0)db[idx]=rec;else db.push(rec);
+    saveDB(db);
+  } else {
+    var fail=false;var gaKeys=Object.keys(ga);
+    for(var j=0;j<gaKeys.length;j++){if(ga[gaKeys[j]]==='no'){fail=true;break;}}
+    rec={
+      id:Date.now(),date:fd.date||new Date().toISOString().split('T')[0],
+      name:fd.name||'Без имени',pos:fd.pos||'',rec:fd.rec||'',hm:fd.hm||'',
+      level:fd.level||'',dept:fd.dept||'',mode:mode,
+      gate:JSON.parse(JSON.stringify(ga)),
+      gatePassed:gaKeys.length===3&&!fail,
+      scRec:JSON.parse(JSON.stringify(scRec)),scMgr:{},
+      ntRec:JSON.parse(JSON.stringify(ntRec)),ntMgr:{},
+      comment:fd.comment||'',commentMgr:'',verdict:verdict,
+      avgRec:avgNums(scRec),avgMgr:null,status:'recruiter'
+    };
+    var db2=getDB();db2.push(rec);saveDB(db2);
+  }
+  closeModal();
+  // Show share code if recruiter
+  if(!isManager){
+    var code=encodeRecord(rec);
+    setTimeout(function(){showShareCode(code,rec.name);},200);
+  }
+  renderDash();renderCands();
+}
+
+function showShareCode(code,name){
+  var shareModal=document.getElementById('share-modal-overlay');
+  if(!shareModal){
+    var div=document.createElement('div');
+    div.id='share-modal-overlay';
+    div.className='overlay show';
+    div.innerHTML='<div class="modal" style="max-width:520px"><div class="modal-head"><div class="modal-title">Карточка сохранена ✅</div><button class="modal-close" onclick="document.getElementById(\'share-modal-overlay\').remove()">✕</button></div><div class="modal-body"><p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">Карточка <strong>'+name+'</strong> сохранена. Поделитесь кодом с нанимающим менеджером — он откроет её через «Открыть по коду» и добавит свои оценки.</p><div class="share-box"><div class="share-box-title">Код карточки для менеджера</div><div class="share-box-desc">Скопируйте и отправьте в Telegram, Teams или по почте</div><div class="code-box"><div class="code-display" id="share-code-text">'+code.substring(0,60)+'...</div><button class="btn btn-green btn-sm" onclick="copyCode(\''+code.replace(/'/g,"\\'")+'\')" id="copy-btn">Скопировать</button></div></div></div><div class="modal-foot"><button class="btn btn-dark" onclick="document.getElementById(\'share-modal-overlay\').remove()">Готово</button></div></div>';
+    document.body.appendChild(div);
+  }
+}
+
+function copyCode(code){
+  navigator.clipboard.writeText(code).then(function(){
+    var btn=document.getElementById('copy-btn');
+    if(btn){btn.textContent='Скопировано ✓';btn.style.background='var(--green-bg)';btn.style.color='var(--green-t)';}
+  });
+}
+
+// ===== IMPORT =====
+function openImportModal(){document.getElementById('import-overlay').classList.add('show');}
+function closeImportModal(){document.getElementById('import-overlay').classList.remove('show');document.getElementById('import-code-inp').value='';document.getElementById('import-error').style.display='none';}
+
+function confirmImport(){
+  var code=document.getElementById('import-code-inp').value.trim();
+  var rec=decodeRecord(code);
+  if(!rec||!rec.id){document.getElementById('import-error').style.display='block';return;}
+  // Open modal in manager mode
+  mode=rec.mode||'library';step=0;
+  fd={name:rec.name,pos:rec.pos,rec:rec.rec,hm:rec.hm,level:rec.level,dept:rec.dept,date:rec.date};
+  scRec=JSON.parse(JSON.stringify(rec.scRec||{}));
+  scMgr={};ga=JSON.parse(JSON.stringify(rec.gate||{}));
+  ntRec=JSON.parse(JSON.stringify(rec.ntRec||{}));ntMgr={};
+  openGuides={};openNotes={};verdict=rec.verdict||'';
+  currentRole='manager';editingRecord=rec;
+  document.getElementById('import-overlay').classList.remove('show');
+  document.getElementById('import-code-inp').value='';
+  document.getElementById('modal-title').textContent='Оценка менеджера — '+(rec.name||'Кандидат');
+  renderTabs();renderStepBody();
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+// ===== CANDIDATES =====
+function setFilt(val,btn){activeFilter=val;document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});btn.classList.add('on');renderCands();}
+
+function renderCands(){
+  var db=getDB();
+  var q=(document.getElementById('search-inp')?document.getElementById('search-inp').value:'').toLowerCase();
+  var data=db.filter(function(r){
+    if(q&&r.name.toLowerCase().indexOf(q)===-1&&r.pos.toLowerCase().indexOf(q)===-1)return false;
+    if(activeFilter==='recruiter'&&r.status!=='recruiter')return false;
+    if(activeFilter==='complete'&&r.status!=='complete')return false;
+    if(activeFilter==='hire'&&r.verdict!=='hire')return false;
+    if(activeFilter==='decline'&&r.verdict!=='decline')return false;
+    return true;
+  }).sort(function(a,b){return b.id-a.id;});
+  var n=data.length;
+  if(document.getElementById('cands-sub'))document.getElementById('cands-sub').textContent=n+' кандидат'+(n===1?'':n>=2&&n<=4?'а':'ов');
+  var wrap=document.getElementById('cands-table-wrap');if(!wrap)return;
+  if(!data.length){wrap.innerHTML='<div class="empty"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>Нет кандидатов</p></div>';return;}
+  var vL={hire:'✅ Нанять',hold:'⏸ На рассмотрение',decline:'❌ Отказ'};
+  var vB={hire:'b-green',hold:'b-amber',decline:'b-red'};
+  var rows=data.map(function(r){
+    var statusHtml=r.status==='complete'?'<span class="status-badge sb-complete">✅ Оба заполнили</span>':'<span class="status-badge sb-recruiter">🔍 Ждёт менеджера</span>';
+    var gateCell=Object.keys(r.gate||{}).length?'<span class="gate-status '+(r.gatePassed?'gs-pass':'gs-fail')+'">'+(r.gatePassed?'✅ Пройден':'🚩 Нет')+'</span>':'<span style="color:var(--text3)">—</span>';
+    var recCell=r.avgRec!==null&&r.avgRec!==undefined?'<span class="score-pill">★ '+r.avgRec+'</span>':'<span style="color:var(--text3)">—</span>';
+    var mgrCell=r.avgMgr!==null&&r.avgMgr!==undefined?'<span class="score-pill-orange">★ '+r.avgMgr+'</span>':'<span style="color:var(--text3)">—</span>';
+    var vCell=r.verdict?'<span class="badge '+(vB[r.verdict]||'b-gray')+'">'+(vL[r.verdict]||'—')+'</span>':'<span style="color:var(--text3)">—</span>';
+    return '<tr onclick="showDetail('+r.id+')">'
+      +'<td><div style="font-weight:600">'+r.name+'</div><div style="font-size:11px;color:var(--text2)">'+(r.rec||'')+'</div></td>'
+      +'<td style="color:var(--text2)">'+(r.pos||'—')+'</td>'
+      +'<td>'+statusHtml+'</td>'
+      +'<td>'+gateCell+'</td>'
+      +'<td>'+recCell+'</td>'
+      +'<td>'+mgrCell+'</td>'
+      +'<td>'+vCell+'</td>'
+      +'<td style="color:var(--text2);font-size:12px">'+r.date+'</td>'
+      +'</tr>';
+  }).join('');
+  wrap.innerHTML='<table><thead><tr><th>Кандидат</th><th>Вакансия</th><th>Статус</th><th>Gate</th><th>🔍 Рекрутер</th><th>👔 Менеджер</th><th>Вердикт</th><th>Дата</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// ===== DETAIL =====
+function showDetail(id){
+  var db=getDB();var r=null;
+  for(var i=0;i<db.length;i++){if(db[i].id===id){r=db[i];break;}}
+  if(!r)return;
+  document.getElementById('dp-name').textContent=r.name;
+  document.getElementById('dp-meta').textContent=[r.pos,r.level,r.date].filter(Boolean).join(' · ');
+  var vL={hire:'✅ Нанять',hold:'⏸ На рассмотрение',decline:'❌ Отказ'};
+  var html='';
+  // Status
+  var statusBadge=r.status==='complete'?'<span class="status-badge sb-complete">✅ Оба заполнили</span>':'<span class="status-badge sb-recruiter">🔍 Ждёт оценки менеджера</span>';
+  html+='<div style="margin-bottom:14px">'+statusBadge+'</div>';
+  // Gate
+  if(Object.keys(r.gate||{}).length){
+    html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">Gate</div>';
+    GATE_DATA.forEach(function(g){var v=r.gate[g.id];if(v)html+='<div class="det-row"><div class="det-row-head"><span>'+g.name+'</span><span class="gate-status '+(v==='yes'?'gs-pass':'gs-fail')+'">'+(v==='yes'?'✅ ДА':'🚩 НЕТ')+'</span></div></div>';});
+  }
+  // Scores
+  var allIds=Object.keys(r.scRec||{});
+  var mgrIds=Object.keys(r.scMgr||{});
+  var unionIds=allIds.slice();
+  mgrIds.forEach(function(k){if(unionIds.indexOf(k)===-1)unionIds.push(k);});
+  if(unionIds.length){
+    html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:14px 0 8px">Компетенции</div>';
+    unionIds.forEach(function(sid){
+      var vRec=r.scRec[sid];var vMgr=r.scMgr?r.scMgr[sid]:undefined;
+      var comp=LIB[sid];
+      if(!comp){var all=LEAD_L3.concat(LEAD_L4);for(var k=0;k<all.length;k++){if(all[k].id===sid){comp={name:all[k].name};break;}}}
+      var name=comp?comp.name:sid;
+      var recDots='<div class="dots">';for(var n=1;n<=5;n++)recDots+='<div class="dot'+(n<=vRec?' on-rec':'')+'"></div>';recDots+='</div>';
+      var mgrDots='';
+      if(vMgr!==undefined&&vMgr!==null){mgrDots='<div class="dots">';for(var m=1;m<=5;m++)mgrDots+='<div class="dot'+(m<=vMgr?' on-mgr':'')+'"></div>';mgrDots+='</div>';}
+      html+='<div class="det-row"><div class="det-row-head"><span style="font-size:13px">'+name+'</span></div>'
+        +'<div class="score-compare">'
+        +(vRec==='na'?'<span style="font-size:11px;color:var(--blue-t)">🔍 Н/П</span>':vRec?'<span style="font-size:11px;color:var(--blue-t);font-weight:600;min-width:16px">🔍 '+vRec+'</span>'+recDots:'')
+        +(vMgr==='na'?'<span style="font-size:11px;color:var(--orange-t)">👔 Н/П</span>':vMgr?'<span style="font-size:11px;color:var(--orange-t);font-weight:600;min-width:16px">👔 '+vMgr+'</span>'+mgrDots:'<span style="font-size:11px;color:var(--text3)">👔 —</span>')
+        +'</div>'
+        +((r.ntRec&&r.ntRec[sid])?'<div style="font-size:11px;color:var(--blue-t);margin-top:2px">🔍 '+r.ntRec[sid]+'</div>':'')
+        +((r.ntMgr&&r.ntMgr[sid])?'<div style="font-size:11px;color:var(--orange-t);margin-top:2px">👔 '+r.ntMgr[sid]+'</div>':'')
+        +'</div>';
+    });
+  }
+  // Comments
+  if(r.comment)html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue-t);margin:14px 0 5px">Комментарий рекрутера</div><div style="font-size:13px;color:var(--text2);line-height:1.6">'+r.comment+'</div>';
+  if(r.commentMgr)html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--orange-t);margin:12px 0 5px">Комментарий менеджера</div><div style="font-size:13px;color:var(--text2);line-height:1.6">'+r.commentMgr+'</div>';
+  if(r.verdict)html+='<div style="margin-top:14px;font-size:14px;font-weight:700">'+(vL[r.verdict]||'')+'</div>';
+  // Re-share code
+  var code=encodeRecord(r);
+  html+='<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">'
+    +(r.status==='recruiter'?'<button class="btn btn-green btn-sm" onclick="copyShareCode(\''+code.replace(/'/g,"\\'")+'\')" id="reshare-btn">📤 Скопировать код для менеджера</button>':'')
+    +'<button class="btn btn-danger btn-sm" onclick="deleteRec('+r.id+')">Удалить</button>'
+    +'</div>';
+  document.getElementById('dp-body').innerHTML=html;
+  document.getElementById('det-panel').classList.add('show');
+  document.getElementById('det-overlay').classList.add('show');
+}
+function copyShareCode(code){
+  navigator.clipboard.writeText(code).then(function(){
+    var btn=document.getElementById('reshare-btn');
+    if(btn)btn.textContent='✓ Скопировано';
+  });
+}
+function closeDetail(){document.getElementById('det-panel').classList.remove('show');document.getElementById('det-overlay').classList.remove('show');}
+function deleteRec(id){if(!confirm('Удалить запись?'))return;saveDB(getDB().filter(function(r){return r.id!==id;}));closeDetail();renderCands();renderDash();}
+
+// ===== DASHBOARD =====
+function barHTML(label,val,max,color){var pct=max>0?val/max*100:0;return '<div class="bar-row"><div class="bar-lbl-row"><span>'+label+'</span><span>'+val+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';}
+
+function renderDash(){
+  var db=getDB();
+  var total=db.length;
+  var hired=db.filter(function(r){return r.verdict==='hire';}).length;
+  var complete=db.filter(function(r){return r.status==='complete';}).length;
+  document.getElementById('stats-row').innerHTML=
+    '<div class="stat-box"><div class="stat-lbl">Всего оценок</div><div class="stat-val">'+total+'</div><div class="stat-sub">за всё время</div></div>'
+    +'<div class="stat-box"><div class="stat-lbl">Оба заполнили</div><div class="stat-val" style="color:var(--green)">'+complete+'</div><div class="stat-sub">из '+total+' карточек</div></div>'
+    +'<div class="stat-box"><div class="stat-lbl">Получили оффер</div><div class="stat-val" style="color:var(--blue)">'+hired+'</div><div class="stat-sub">'+(total?Math.round(hired/total*100):0)+'% конверсия</div></div>';
+  var vC={hire:0,hold:0,decline:0,none:0};
+  db.forEach(function(r){vC[r.verdict||'none']++;});
+  var vm=Math.max(vC.hire,vC.hold,vC.decline,vC.none,1);
+  document.getElementById('chart-verdicts').innerHTML=barHTML('✅ Нанять',vC.hire,vm,'var(--green)')+barHTML('⏸ На рассмотрение',vC.hold,vm,'var(--amber)')+barHTML('❌ Отказ',vC.decline,vm,'var(--red)')+barHTML('Без вердикта',vC.none,vm,'var(--text3)');
+  var cs={};
+  db.forEach(function(r){
+    Object.keys(r.scRec||{}).forEach(function(k){if(typeof r.scRec[k]==='number'){if(!cs[k])cs[k]=[];cs[k].push(r.scRec[k]);}});
+    Object.keys(r.scMgr||{}).forEach(function(k){if(typeof r.scMgr[k]==='number'){if(!cs[k])cs[k]=[];cs[k].push(r.scMgr[k]);}});
+  });
+  var ca=Object.keys(cs).map(function(id){var vals=cs[id];var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length;var comp=LIB[id];if(!comp){var all=LEAD_L3.concat(LEAD_L4);for(var k=0;k<all.length;k++){if(all[k].id===id){comp={name:all[k].name};break;}}}return{id:id,avg:avg,name:comp?comp.name:id};}).sort(function(a,b){return b.avg-a.avg;}).slice(0,6);
+  document.getElementById('chart-comps').innerHTML=ca.length?ca.map(function(c){return barHTML(c.name,c.avg.toFixed(1),5,'var(--blue)');}).join(''):'<div style="color:var(--text3);font-size:13px;padding:10px 0">Нет данных</div>';
+  var gOk=db.filter(function(r){return r.gatePassed;}).length;
+  var wl=db.filter(function(r){return r.avgRec!==null&&r.avgRec!==undefined;}).length;
+  var off=hired;var fm=Math.max(total,1);
+  document.getElementById('chart-funnel').innerHTML=barHTML('Всего кандидатов',total,fm,'var(--blue)')+barHTML('Прошли Gate',gOk,fm,'var(--green)')+barHTML('Оценены по компетенциям',wl,fm,'var(--amber)')+barHTML('Получили оффер',off,fm,'var(--purple)');
+}
+
+// ===== EVENT LISTENERS =====
+document.getElementById('modal-close-btn').addEventListener('click',closeModal);
+document.getElementById('btn-prev').addEventListener('click',goPrev);
+document.getElementById('btn-next').addEventListener('click',goNext);
+document.getElementById('det-close-btn').addEventListener('click',closeDetail);
+document.getElementById('det-overlay').addEventListener('click',closeDetail);
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('import-close-btn').addEventListener('click',closeImportModal);
+document.getElementById('import-cancel-btn').addEventListener('click',closeImportModal);
+document.getElementById('import-confirm-btn').addEventListener('click',confirmImport);
+document.getElementById('import-overlay').addEventListener('click',function(e){if(e.target===this)closeImportModal();});
+
+renderDash();
+</script>
+</body>
+</html>
